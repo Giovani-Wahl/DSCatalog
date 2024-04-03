@@ -2,6 +2,7 @@ package com.giovaniwahl.dscatalog.services;
 import com.giovaniwahl.dscatalog.dtos.CategoryDTO;
 import com.giovaniwahl.dscatalog.entities.Category;
 import com.giovaniwahl.dscatalog.repositories.CategoryRepository;
+import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,7 @@ public class CategoryService {
     }
     @Transactional(readOnly = true)
     public CategoryDTO findById(Long id){
-       Category category = repository.findById(id).orElseThrow();
+       Category category = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Id Not Found."));
        return new CategoryDTO(category);
     }
 }
