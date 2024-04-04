@@ -1,6 +1,7 @@
 package com.giovaniwahl.dscatalog.controllers.handlers;
 
 import com.giovaniwahl.dscatalog.dtos.CustomError;
+import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,12 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<CustomError> resourceNotFound(ResourceNotFoundException e, HttpServletRequest request){
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
+        CustomError error = new CustomError(Instant.now(), httpStatus.value(), e.getMessage(),request.getRequestURI());
+        return ResponseEntity.status(httpStatus).body(error);
+    }
+    @ExceptionHandler(DatabaseException.class)
+    public ResponseEntity<CustomError> database(DatabaseException e,HttpServletRequest request){
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         CustomError error = new CustomError(Instant.now(), httpStatus.value(), e.getMessage(),request.getRequestURI());
         return ResponseEntity.status(httpStatus).body(error);
     }

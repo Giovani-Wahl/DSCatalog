@@ -2,14 +2,15 @@ package com.giovaniwahl.dscatalog.services;
 import com.giovaniwahl.dscatalog.dtos.CategoryDTO;
 import com.giovaniwahl.dscatalog.entities.Category;
 import com.giovaniwahl.dscatalog.repositories.CategoryRepository;
+import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -44,6 +45,18 @@ public class CategoryService {
         }
         catch (EntityNotFoundException e){
             throw new ResourceNotFoundException("Resource not found!");
+        }
+    }
+    @Transactional
+    public void delete(Long id){
+        if (!repository.existsById(id)){
+            throw new ResourceNotFoundException("Resource not found !");
+        }
+        try {
+            repository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e){
+            throw new DatabaseException("Referential integrity failure !");
         }
     }
 
