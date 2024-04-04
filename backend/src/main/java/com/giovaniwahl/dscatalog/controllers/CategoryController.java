@@ -26,4 +26,8 @@ public class CategoryController {
     public ResponseEntity<CategoryDTO> insert(@RequestBody CategoryDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insert(dto));
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDTO> update(@PathVariable Long id,@RequestBody CategoryDTO dto){
+        return ResponseEntity.status(HttpStatus.OK).body(service.update(id, dto));
+    }
 }
