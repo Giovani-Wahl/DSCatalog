@@ -3,6 +3,7 @@ import com.giovaniwahl.dscatalog.dtos.CategoryDTO;
 import com.giovaniwahl.dscatalog.dtos.ProductDTO;
 import com.giovaniwahl.dscatalog.entities.Category;
 import com.giovaniwahl.dscatalog.entities.Product;
+import com.giovaniwahl.dscatalog.repositories.CategoryRepository;
 import com.giovaniwahl.dscatalog.repositories.ProductRepository;
 import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
     @Autowired
     private ProductRepository repository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
     public Page<ProductDTO> findAll(Pageable pageable){
@@ -32,10 +35,15 @@ public class ProductService {
 
     @Transactional
     public ProductDTO insert(ProductDTO dto){
-        Product product = new Product();
-        copyDtoToEntity(dto,product);
-        product = repository.save(product);
-        return new ProductDTO(product);
+        try {
+            Product product = new Product();
+            copyDtoToEntity(dto,product);
+            product = repository.save(product);
+            return new ProductDTO(product);
+        }
+        catch (EntityNotFoundException e){
+            throw new ResourceNotFoundException("Category does not exist!");
+        }
     }
     @Transactional
     public ProductDTO update(Long id, ProductDTO dto){
@@ -70,8 +78,7 @@ public class ProductService {
         product.setDate(dto.getDate());
         product.getCategories().clear();
         for (CategoryDTO catDTO : dto.getCategories()){
-            Category cat = new Category();
-            cat.setId(catDTO.getId());
+            Category cat = categoryRepository.getReferenceById(catDTO.getId());
             product.getCategories().add(cat);
         }
     }
