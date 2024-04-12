@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Optional;
 
@@ -17,11 +16,13 @@ public class ProductRepositoryTests {
     private ProductRepository repository;
 
     private Long existingId;
+    private Long nonExistingId;
     private Long countTotalProducts;
 
     @BeforeEach
     void setUp()throws Exception{
         existingId = 1L;
+        nonExistingId=1000L;
         countTotalProducts = 25L;
     }
 
@@ -38,5 +39,16 @@ public class ProductRepositoryTests {
         product = repository.save(product);
         Assertions.assertNotNull(product.getId());
         Assertions.assertEquals(countTotalProducts+1,product.getId());
+    }
+    @Test
+    public void findByIdShouldReturnOptionalNotEmptyWhenIdNotNull(){
+        Optional<Product> result = repository.findById(existingId);
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isPresent());
+    }
+    @Test
+    public void findByIdShouldReturnOptionalEmptyWhenIdDoesNotExists(){
+        Optional<Product> result = repository.findById(nonExistingId);
+        Assertions.assertFalse(result.isPresent());
     }
 }
