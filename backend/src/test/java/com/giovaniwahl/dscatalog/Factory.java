@@ -14,6 +14,8 @@ public class Factory {
         return product;
     }
     public static ProductDTO createProductDTO(){
-        return new ProductDTO(createProduct());
+        ProductDTO dto = new ProductDTO(1L, "Phone", "Good Phone", 800.0,
+                "https://img.com/img.ping", Instant.parse("2020-10-20T03:00:00Z"));
+        return dto;
     }
 }

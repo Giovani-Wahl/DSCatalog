@@ -2,7 +2,9 @@ package com.giovaniwahl.dscatalog.services;
 
 import com.giovaniwahl.dscatalog.Factory;
 import com.giovaniwahl.dscatalog.dtos.ProductDTO;
+import com.giovaniwahl.dscatalog.entities.Category;
 import com.giovaniwahl.dscatalog.entities.Product;
+import com.giovaniwahl.dscatalog.repositories.CategoryRepository;
 import com.giovaniwahl.dscatalog.repositories.ProductRepository;
 import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
@@ -31,12 +33,16 @@ public class ProductServiceTests {
     private ProductService service;
     @Mock
     private ProductRepository repository;
+    @Mock
+    private CategoryRepository categoryRepository;
 
     private Long existingId;
     private Long nonExistingId;
     private long dependentId;
     private Product product;
     private PageImpl<Product> page;
+    private Category category;
+    private ProductDTO dto;
 
     @BeforeEach
     void setUp()throws Exception{
@@ -45,6 +51,7 @@ public class ProductServiceTests {
         dependentId = 3L;
         product = Factory.createProduct();
         page = new PageImpl<>(List.of(product));
+        dto = Factory.createProductDTO();
 
         Mockito.doNothing().when(repository).deleteById(existingId);
         Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
@@ -59,6 +66,9 @@ public class ProductServiceTests {
 
         Mockito.when(repository.findById(existingId)).thenReturn(Optional.of(product));
         Mockito.when(repository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        Mockito.when(repository.getReferenceById(existingId)).thenReturn(product);
+        Mockito.when(repository.getReferenceById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
     }
 
     @Test
@@ -86,5 +96,30 @@ public class ProductServiceTests {
         Page<ProductDTO> result = service.findAll(pageable);
         Assertions.assertNotNull(result);
         Mockito.verify(repository).findAll(pageable);
+    }
+    @Test
+    public void findByIdShouldReturnDtoWhenIdExists(){
+        Assertions.assertDoesNotThrow(()->{
+            service.findById(existingId);
+            Mockito.verify(repository).findById(existingId);
+        });
+    }
+    @Test
+    public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist(){
+        Assertions.assertThrows(ResourceNotFoundException.class,()->{
+            service.findById(nonExistingId);
+        });
+    }
+    @Test
+    public void updateShouldReturnDtoWhenIdExists(){
+        Assertions.assertDoesNotThrow(()->{
+            service.update(existingId,dto);
+        });
+    }
+    @Test
+    public void updateShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist(){
+        Assertions.assertThrows(ResourceNotFoundException.class,()->{
+            service.update(nonExistingId,dto);
+        });
     }
 }
