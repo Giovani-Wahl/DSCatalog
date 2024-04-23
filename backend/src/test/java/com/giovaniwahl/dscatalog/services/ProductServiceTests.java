@@ -28,7 +28,6 @@ import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 public class ProductServiceTests {
-
     @InjectMocks
     private ProductService service;
     @Mock
