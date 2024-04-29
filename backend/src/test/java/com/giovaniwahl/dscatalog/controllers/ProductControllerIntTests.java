@@ -1,5 +1,8 @@
 package com.giovaniwahl.dscatalog.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.giovaniwahl.dscatalog.Factory;
+import com.giovaniwahl.dscatalog.dtos.ProductDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +23,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProductControllerIntTests {
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Long existingId;
     private Long nonExistingId;
     private Long dependentId;
     private Long countTotalProducts;
+    private ProductDTO dto;
+    private String jsonBody;
 
     @BeforeEach
     void setup()throws Exception{
@@ -32,6 +39,8 @@ public class ProductControllerIntTests {
         nonExistingId=2000L;
         dependentId=3L;
         countTotalProducts=25L;
+        dto = Factory.createProductDTO();
+        jsonBody = objectMapper.writeValueAsString(dto);
     }
     @Test
     public void findAllShouldReturnSortedPageWhenSortedByName()throws Exception{
@@ -41,5 +50,24 @@ public class ProductControllerIntTests {
                 .andExpect(jsonPath("$.totalElements").value(countTotalProducts))
                 .andExpect(jsonPath("$.content").exists())
                 .andExpect(jsonPath("$.content[0].name").value("Macbook Pro"));
+    }
+    @Test
+    public void updateShouldReturnDtoWhenIdExists()throws Exception{
+        String expectName = dto.getName();
+        mockMvc.perform(put("/products/{id}",existingId)
+                        .content(jsonBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(existingId))
+                .andExpect(jsonPath("$.name").value(expectName));
+    }
+    @Test
+    public void updateShouldReturnNotFoundWhenIdDoesNotExists()throws Exception{
+        mockMvc.perform(put("/products/{id}",nonExistingId)
+                        .content(jsonBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }
