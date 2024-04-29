@@ -1,6 +1,7 @@
 package com.giovaniwahl.dscatalog.services;
 
 import com.giovaniwahl.dscatalog.repositories.ProductRepository;
+import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,5 +33,11 @@ public class ProductServiceIntTests {
     public void deleteShouldDeleteResourceWhenIdExists(){
         service.delete(existingId);
         Assertions.assertEquals(countTotalProducts-1,repository.count());
+    }
+    @Test
+    public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExists(){
+        Assertions.assertThrows(ResourceNotFoundException.class,()->{
+            service.delete(nonExistingId);
+        });
     }
 }
