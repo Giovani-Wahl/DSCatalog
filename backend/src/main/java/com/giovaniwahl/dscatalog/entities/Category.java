@@ -42,6 +42,10 @@ public class Category {
         this.name = name;
     }
 
+    public Set<Product> getProducts() {
+        return products;
+    }
+
     public Instant getCreatedAt() {return createdAt;}
 
     public Instant getUpdateAt() {return updateAt;}
