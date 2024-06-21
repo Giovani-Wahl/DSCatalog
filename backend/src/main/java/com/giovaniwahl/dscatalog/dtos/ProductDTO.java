@@ -2,6 +2,9 @@ package com.giovaniwahl.dscatalog.dtos;
 
 import com.giovaniwahl.dscatalog.entities.Category;
 import com.giovaniwahl.dscatalog.entities.Product;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -9,10 +12,15 @@ import java.util.List;
 
 public class ProductDTO {
     private Long id;
+    @NotBlank(message = "Required field.")
     private String name;
+    @NotBlank(message = "Required field.")
     private String description;
+    @NotBlank(message = "Required field.")
+    @Positive(message = "The value entered must be a positive number.")
     private Double price;
     private String imgUrl;
+    @PastOrPresent(message = "Invalid date.")
     private Instant date;
     private List<CategoryDTO> categories = new ArrayList<>();
 
