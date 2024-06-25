@@ -3,6 +3,7 @@ package com.giovaniwahl.dscatalog.controllers;
 import com.giovaniwahl.dscatalog.dtos.UserDTO;
 import com.giovaniwahl.dscatalog.dtos.UserDTO;
 import com.giovaniwahl.dscatalog.dtos.UserInsertDTO;
+import com.giovaniwahl.dscatalog.dtos.UserUpdateDTO;
 import com.giovaniwahl.dscatalog.services.UserService;
 import com.giovaniwahl.dscatalog.services.UserService;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insert(dto));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id,@Valid @RequestBody UserDTO dto){
+    public ResponseEntity<UserDTO> update(@PathVariable Long id,@Valid @RequestBody UserUpdateDTO dto){
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, dto));
     }
     @DeleteMapping("/{id}")

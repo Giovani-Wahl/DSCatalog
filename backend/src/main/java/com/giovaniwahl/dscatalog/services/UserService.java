@@ -2,6 +2,7 @@ package com.giovaniwahl.dscatalog.services;
 import com.giovaniwahl.dscatalog.dtos.RoleDTO;
 import com.giovaniwahl.dscatalog.dtos.UserDTO;
 import com.giovaniwahl.dscatalog.dtos.UserInsertDTO;
+import com.giovaniwahl.dscatalog.dtos.UserUpdateDTO;
 import com.giovaniwahl.dscatalog.entities.Role;
 import com.giovaniwahl.dscatalog.entities.User;
 import com.giovaniwahl.dscatalog.repositories.RoleRepository;
@@ -51,7 +52,7 @@ public class UserService {
         }
     }
     @Transactional
-    public UserDTO update(Long id, UserDTO dto){
+    public UserDTO update(Long id, UserUpdateDTO dto){
         try {
             User user = repository.getReferenceById(id);
             copyDtoToEntity(dto,user);
