@@ -25,7 +25,7 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(DatabaseException.class)
     public ResponseEntity<CustomError> database(DatabaseException e,HttpServletRequest request){
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        CustomError error = new CustomError(Instant.now(), httpStatus.value(), e.getMessage(),request.getRequestURI());
+        ValidationError error = new ValidationError(Instant.now(), httpStatus.value(), e.getMessage(),request.getRequestURI());
         return ResponseEntity.status(httpStatus).body(error);
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
