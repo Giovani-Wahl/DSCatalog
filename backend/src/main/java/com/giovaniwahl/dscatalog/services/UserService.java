@@ -5,6 +5,7 @@ import com.giovaniwahl.dscatalog.dtos.UserInsertDTO;
 import com.giovaniwahl.dscatalog.dtos.UserUpdateDTO;
 import com.giovaniwahl.dscatalog.entities.Role;
 import com.giovaniwahl.dscatalog.entities.User;
+import com.giovaniwahl.dscatalog.projections.UserDetailsProjection;
 import com.giovaniwahl.dscatalog.repositories.RoleRepository;
 import com.giovaniwahl.dscatalog.repositories.UserRepository;
 import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
@@ -14,14 +15,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository repository;
     @Autowired
@@ -85,5 +91,20 @@ public class UserService {
             Role role = roleRepository.getReferenceById(roleDTO.getId());
             user.getRoles().add(role);
         }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+        if (result.isEmpty()){
+            throw new UsernameNotFoundException("User Name Not Found.");
+        }
+        User user = new User();
+        user.setEmail(result.get(0).getUsername());
+        user.setPassword(result.get(0).getPassword());
+        for (UserDetailsProjection projection : result){
+            user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
+        }
+        return user;
     }
 }
