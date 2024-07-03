@@ -2,6 +2,7 @@ package com.giovaniwahl.dscatalog.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giovaniwahl.dscatalog.Factory;
+import com.giovaniwahl.dscatalog.TokenUtil;
 import com.giovaniwahl.dscatalog.dtos.ProductDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,8 @@ public class ProductControllerIntTests {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private TokenUtil tokenUtil;
 
     private Long existingId;
     private Long nonExistingId;
@@ -32,6 +35,7 @@ public class ProductControllerIntTests {
     private Long countTotalProducts;
     private ProductDTO dto;
     private String jsonBody;
+    private String username, password, bearerToken;
 
     @BeforeEach
     void setup()throws Exception{
@@ -41,6 +45,9 @@ public class ProductControllerIntTests {
         countTotalProducts=25L;
         dto = Factory.createProductDTO();
         jsonBody = objectMapper.writeValueAsString(dto);
+        username = "maria@gmail.com";
+        password = "123456";
+        bearerToken = tokenUtil.obtainAccessToken(mockMvc, username, password);
     }
     @Test
     public void findAllShouldReturnSortedPageWhenSortedByName()throws Exception{
@@ -55,6 +62,7 @@ public class ProductControllerIntTests {
     public void updateShouldReturnDtoWhenIdExists()throws Exception{
         String expectName = dto.getName();
         mockMvc.perform(put("/products/{id}",existingId)
+                        .header("Authorization", "Bearer " + bearerToken)
                         .content(jsonBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -65,6 +73,7 @@ public class ProductControllerIntTests {
     @Test
     public void updateShouldReturnNotFoundWhenIdDoesNotExists()throws Exception{
         mockMvc.perform(put("/products/{id}",nonExistingId)
+                        .header("Authorization", "Bearer " + bearerToken)
                         .content(jsonBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
