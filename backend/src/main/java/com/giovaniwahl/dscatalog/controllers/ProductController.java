@@ -1,6 +1,7 @@
 package com.giovaniwahl.dscatalog.controllers;
 
 import com.giovaniwahl.dscatalog.dtos.ProductDTO;
+import com.giovaniwahl.dscatalog.projections.ProductProjection;
 import com.giovaniwahl.dscatalog.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,9 @@ public class ProductController {
     private ProductService service;
 
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> findAll(
+    public ResponseEntity<Page<ProductProjection>> findAll(
             @PageableDefault(page = 0, size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable){
-        return ResponseEntity.status(HttpStatus.OK).body(service.findAll(pageable));
+        return ResponseEntity.status(HttpStatus.OK).body(service.test(pageable));
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ import com.giovaniwahl.dscatalog.dtos.CategoryDTO;
 import com.giovaniwahl.dscatalog.dtos.ProductDTO;
 import com.giovaniwahl.dscatalog.entities.Category;
 import com.giovaniwahl.dscatalog.entities.Product;
+import com.giovaniwahl.dscatalog.projections.ProductProjection;
 import com.giovaniwahl.dscatalog.repositories.CategoryRepository;
 import com.giovaniwahl.dscatalog.repositories.ProductRepository;
 import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
 
 @Service
 public class ProductService {
@@ -81,5 +84,10 @@ public class ProductService {
             Category cat = categoryRepository.getReferenceById(catDTO.getId());
             product.getCategories().add(cat);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductProjection> test(Pageable pageable) {
+        return repository.searchProducts(Arrays.asList(1L,3L),"ma",pageable);
     }
 }
