@@ -12,11 +12,14 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -25,10 +28,19 @@ public class ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+
     @Transactional(readOnly = true)
-    public Page<ProductDTO> findAll(Pageable pageable){
-        Page<Product> result = repository.findAll(pageable);
-        return result.map(ProductDTO::new);
+    public Page<ProductDTO> findAllPaged(String categoryId, String name, Pageable pageable) {
+        List<Long> categoryIds = new ArrayList<>();
+        if (!"0".equals(categoryId)) {
+            categoryIds = Arrays.stream(categoryId.split(",")).map(Long::parseLong).toList();
+        }
+        Page<ProductProjection> page = repository.searchProducts(categoryIds,name,pageable);
+        List<Long> productIds = page.map(ProductProjection::getId).toList();
+        List<Product> entities = repository.searchProductsWithCategories(productIds);
+        List<ProductDTO> dtos = entities.stream().map(ProductDTO::new).toList();
+        Page<ProductDTO> pageDto = new PageImpl<>(dtos,page.getPageable(), page.getTotalElements());
+        return pageDto;
     }
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id){
@@ -84,10 +96,5 @@ public class ProductService {
             Category cat = categoryRepository.getReferenceById(catDTO.getId());
             product.getCategories().add(cat);
         }
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ProductProjection> test(Pageable pageable) {
-        return repository.searchProducts(Arrays.asList(1L,3L),"ma",pageable);
     }
 }
