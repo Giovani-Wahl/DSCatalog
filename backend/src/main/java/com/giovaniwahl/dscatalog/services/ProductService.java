@@ -8,6 +8,7 @@ import com.giovaniwahl.dscatalog.repositories.CategoryRepository;
 import com.giovaniwahl.dscatalog.repositories.ProductRepository;
 import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
+import com.giovaniwahl.dscatalog.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,9 +39,9 @@ public class ProductService {
         Page<ProductProjection> page = repository.searchProducts(categoryIds,name,pageable);
         List<Long> productIds = page.map(ProductProjection::getId).toList();
         List<Product> entities = repository.searchProductsWithCategories(productIds);
+        entities = (List<Product>) Utils.replace(page.getContent(),entities);
         List<ProductDTO> dtos = entities.stream().map(ProductDTO::new).toList();
-        Page<ProductDTO> pageDto = new PageImpl<>(dtos,page.getPageable(), page.getTotalElements());
-        return pageDto;
+        return new PageImpl<>(dtos,page.getPageable(), page.getTotalElements());
     }
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id){
