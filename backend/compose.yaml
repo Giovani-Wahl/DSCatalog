@@ -1,0 +1,12 @@
+services:
+  postgres:
+    image: 'postgres:15-alpine'
+    container_name: 'dscatalog-postgresql'
+    environment:
+      - 'POSTGRES_DB=mydatabase'
+      - 'POSTGRES_PASSWORD=1234567'
+      - 'POSTGRES_USER=myuser'
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./.data/postgresql/data:/var/lib/postgresql/data
