@@ -3,6 +3,7 @@ package com.giovaniwahl.dscatalog.controllers.handlers;
 import com.giovaniwahl.dscatalog.dtos.CustomError;
 import com.giovaniwahl.dscatalog.dtos.ValidationError;
 import com.giovaniwahl.dscatalog.services.exceptions.DatabaseException;
+import com.giovaniwahl.dscatalog.services.exceptions.EmailException;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,12 @@ public class ControllerExceptionHandler {
         for (FieldError f: e.getBindingResult().getFieldErrors()){
             error.addError(f.getField(),f.getDefaultMessage());
         }
+        return ResponseEntity.status(httpStatus).body(error);
+    }
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<CustomError> emailException(EmailException e,HttpServletRequest request){
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ValidationError error = new ValidationError(Instant.now(), httpStatus.value(), e.getMessage(),request.getRequestURI());
         return ResponseEntity.status(httpStatus).body(error);
     }
 }
