@@ -1,5 +1,6 @@
 package com.giovaniwahl.dscatalog.services;
 
+import com.giovaniwahl.dscatalog.dtos.NewPasswordDTO;
 import com.giovaniwahl.dscatalog.dtos.RecoverTokenDTO;
 import com.giovaniwahl.dscatalog.entities.PasswordRecover;
 import com.giovaniwahl.dscatalog.entities.User;
@@ -8,10 +9,12 @@ import com.giovaniwahl.dscatalog.repositories.UserRepository;
 import com.giovaniwahl.dscatalog.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,6 +24,8 @@ public class AuthService {
     @Value("${email.password-recover.uri}")
     private String recoverUri;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -44,5 +49,16 @@ public class AuthService {
         String body = "Acesse o link para definir uma nova senha (válido por " +tokenMinutes + "minutos):\n\n"
                 + recoverUri + token;
         emailService.sendEmail(dto.getEmail(),"Recuperação de Senha",body);
+    }
+
+    @Transactional
+    public void saveNewPassword(NewPasswordDTO dto) {
+        List<PasswordRecover> result = recoverRepository.searchValidTokens(dto.getToken(), Instant.now());
+        if (result.isEmpty()){
+            throw new ResourceNotFoundException("Invalid token");
+        }
+        User user = userRepository.findByEmail(result.get(0).getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(user);
     }
 }
