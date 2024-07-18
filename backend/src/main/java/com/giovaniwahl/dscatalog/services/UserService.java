@@ -32,12 +32,21 @@ public class UserService implements UserDetailsService {
     private UserRepository repository;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private AuthService authService;
 
     @Transactional(readOnly = true)
     public Page<UserDTO> findAll(Pageable pageable){
         Page<User> result = repository.findAll(pageable);
         return result.map(UserDTO::new);
     }
+
+    @Transactional(readOnly = true)
+    public UserDTO findLoggedUser(){
+        User user = authService.authenticated();
+        return new UserDTO(user);
+    }
+
     @Transactional(readOnly = true)
     public UserDTO findById(Long id){
        User user = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Id Not Found."));
